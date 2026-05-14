@@ -900,7 +900,7 @@
         <section id="resultIntro" class="result-card">
           <p class="eyebrow">今日結果</p>
           <h2>{{ selectedEntry?.place.name || '點招財貓手手開始抽選' }}</h2>
-          <p class="muted">{{ selectedEntry?.place.type || '純 Vue / GitHub Pages 版會用目前定位查 OpenStreetMap 免費店家資料，再手動跳轉 Google Maps 導航。' }}</p>
+          <p class="muted">{{ selectedEntry?.place.type || '純 Vue / GitHub Pages 版會用目前定位查 OpenStreetMap 免費店家資料，再手動跳轉 Apple Maps 查看完整資訊或導航。' }}</p>
 
           <div v-if="isDrawing" class="search-status" aria-live="polite">
             <span class="spinner" aria-hidden="true"></span>
@@ -908,10 +908,10 @@
           </div>
 
           <div class="place-actions">
-            <a class="place-action primary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildMapUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">路線</a>
+            <a class="place-action primary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildAppleDirectionsUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">路線</a>
             <a class="place-action" :class="{ disabled: !selectedEntry?.place.phone }" :href="selectedEntry?.place.phone ? `tel:${selectedEntry.place.phone.replaceAll('-', '')}` : '#'">通話</a>
-            <a class="place-action" :class="{ disabled: !selectedEntry?.place.website }" :href="selectedEntry?.place.website || '#'" target="_blank" rel="noreferrer">網站</a>
-            <a class="place-action" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildIfoodieUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">更多</a>
+            <a class="place-action" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildApplePlaceUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">Apple</a>
+            <a class="place-action" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildIfoodieUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">愛食記</a>
           </div>
 
           <div class="place-meta">
@@ -936,7 +936,9 @@
           </dl>
           <div class="actions">
             <a class="action-button" :class="{ disabled: !selectedEntry?.place.phone }" :href="selectedEntry?.place.phone ? `tel:${selectedEntry.place.phone.replaceAll('-', '')}` : '#'">撥打電話</a>
-            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildMapUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">地圖導航</a>
+            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildApplePlaceUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">Apple Maps 查看</a>
+            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildAppleDirectionsUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">Apple Maps 導航</a>
+            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildIfoodieUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">愛食記搜尋</a>
           </div>
         </section>
 
@@ -1196,7 +1198,7 @@
               distance,
               distanceText: formatDistance(distance),
               tags: tagsForFiltering(tags),
-              mapUrl: `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
+              mapUrl: `https://maps.apple.com/?ll=${latitude},${longitude}&q=${encodeURIComponent(tags.name)}`
             };
           }
 
@@ -1313,13 +1315,19 @@
             return "driving";
           }
 
-          function buildMapUrl(entry) {
-            if (!currentLocation.value) return entry.place.mapUrl;
-
-            const origin = `${currentLocation.value.latitude},${currentLocation.value.longitude}`;
+          function buildApplePlaceUrl(entry) {
             const destination = `${entry.place.latitude},${entry.place.longitude}`;
-            const mode = travelModeForMaps(entry.filters.transport);
-            return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${mode}`;
+            const name = encodeURIComponent(entry.place.name);
+            return `https://maps.apple.com/?ll=${destination}&q=${name}`;
+          }
+
+          function buildAppleDirectionsUrl(entry) {
+            const destination = `${entry.place.latitude},${entry.place.longitude}`;
+            const name = encodeURIComponent(entry.place.name);
+            if (!currentLocation.value) return buildApplePlaceUrl(entry);
+            const origin = `${currentLocation.value.latitude},${currentLocation.value.longitude}`;
+            const transportMode = entry.filters.transport === "步行" ? "w" : "d";
+            return `https://maps.apple.com/?saddr=${origin}&daddr=${destination}&q=${name}&dirflg=${transportMode}`;
           }
 
           function buildIfoodieUrl(entry) {
@@ -1429,7 +1437,8 @@
             selectedEntry,
             remainingCredits,
             requestLocation,
-            buildMapUrl,
+            buildApplePlaceUrl,
+            buildAppleDirectionsUrl,
             buildIfoodieUrl,
             selectEntry,
             scrollToTop,
