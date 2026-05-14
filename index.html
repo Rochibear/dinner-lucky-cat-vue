@@ -896,8 +896,10 @@
           const capsuleOpened = ref(false);
           const revealText = ref("");
           const isLocating = ref(false);
-          const locationStatus = ref("尚未定位；按下後會請瀏覽器取得目前位置。");
           const currentLocation = ref(loadLocation());
+          const locationStatus = ref(currentLocation.value
+            ? `已使用上次定位，誤差約 ${currentLocation.value.accuracy} 公尺。`
+            : "正在準備詢問目前位置...");
           const pendingEntry = ref(null);
           const selectedEntry = ref(state.drawHistoryToday.at(-1) || null);
 
@@ -1073,6 +1075,10 @@
             () => nextTick(saveState),
             { deep: true }
           );
+
+          if (!currentLocation.value) {
+            window.setTimeout(requestLocation, 700);
+          }
 
           return {
             transportOptions,
