@@ -267,6 +267,24 @@
         transform: translateX(-50%);
       }
 
+      .arm-label {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border: 3px solid var(--cat-line);
+        border-radius: 50%;
+        color: #fffaf1;
+        background: var(--cat-accent);
+        transform: translate(-50%, -50%);
+        font-size: 13px;
+        font-weight: 900;
+        pointer-events: none;
+      }
+
       .arm:disabled {
         opacity: 0.44;
         cursor: not-allowed;
@@ -333,12 +351,17 @@
         position: absolute;
         left: 50%;
         top: 50%;
-        width: 26px;
-        height: 26px;
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
         border: 4px solid #7d5140;
         border-radius: 50%;
+        color: #7a461f;
         background: var(--gold);
         transform: translate(-50%, -50%);
+        font-size: 13px;
+        font-weight: 900;
       }
 
       .capsule.opened {
@@ -365,6 +388,41 @@
         font-size: 24px;
         font-weight: 900;
         animation: revealPrize 0.46s ease both;
+      }
+
+      .retry-button {
+        position: absolute;
+        top: 68px;
+        left: 16px;
+        min-height: 40px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 8px;
+        color: #fffaf1;
+        background: var(--red);
+        box-shadow: 0 12px 24px rgba(58, 37, 20, 0.18);
+        cursor: pointer;
+        font-weight: 900;
+        z-index: 5;
+      }
+
+      .top-button {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        color: #fffaf1;
+        background: var(--ink);
+        box-shadow: 0 16px 32px rgba(58, 37, 20, 0.24);
+        cursor: pointer;
+        font-size: 22px;
+        font-weight: 900;
+        z-index: 20;
       }
 
       .controls {
@@ -681,7 +739,9 @@
                 <span class="whisker w3"></span>
                 <span class="whisker w4"></span>
               </div>
-              <button class="arm" type="button" :disabled="isDrawing || remainingCredits === 0" aria-label="點招財貓手手抽晚餐" @click="startDraw"></button>
+              <button class="arm" type="button" :disabled="isDrawing || remainingCredits === 0" aria-label="點招財貓手手抽晚餐" @click="startDraw">
+                <span class="arm-label">點我</span>
+              </button>
               <div class="body">
                 <div class="coin-door"><span>福</span></div>
               </div>
@@ -690,10 +750,12 @@
             </div>
 
             <button class="capsule" :class="{ hidden: !showCapsule, opened: capsuleOpened }" type="button" aria-label="打開扭蛋" @click="openCapsule">
-              <span></span>
+              <span>點我</span>
             </button>
             <div class="reveal" :class="{ hidden: !revealText }" aria-live="polite">{{ revealText }}</div>
           </div>
+
+          <button v-if="selectedEntry && !isDrawing && remainingCredits > 0" class="retry-button" type="button" @click="startDraw">重抽</button>
         </div>
 
         <form class="controls" @submit.prevent>
@@ -746,7 +808,7 @@
       </section>
 
       <aside class="right-pane">
-        <section class="result-card">
+        <section id="resultIntro" class="result-card">
           <p class="eyebrow">今日結果</p>
           <h2>{{ selectedEntry?.place.name || '點招財貓手手開始抽選' }}</h2>
           <p class="muted">{{ selectedEntry?.place.type || '純 Vue / GitHub Pages 版目前使用示範店家資料，不會真的依定位搜尋附近餐廳。之後若接 Google Places API，才會依目前位置找店。' }}</p>
@@ -785,6 +847,8 @@
           <p class="muted">目前資料只存在同一台裝置、同一個瀏覽器。不同電腦、無痕模式或清除瀏覽器資料後，抽選紀錄不會保留。</p>
         </section>
       </aside>
+
+      <button class="top-button" type="button" aria-label="回到最上方" title="回到最上方" @click="scrollToTop">↑</button>
     </main>
 
     <script>
@@ -1026,6 +1090,16 @@
             return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${mode}`;
           }
 
+          function scrollToResult() {
+            window.setTimeout(() => {
+              document.querySelector("#resultIntro")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 260);
+          }
+
+          function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+
           function startDraw() {
             if (remainingCredits.value === 0) {
               revealText.value = "今日 3 次已用完";
@@ -1068,6 +1142,7 @@
               pendingEntry.value = null;
               isDrawing.value = false;
               saveState();
+              scrollToResult();
             }, 420);
           }
 
@@ -1100,6 +1175,7 @@
             remainingCredits,
             requestLocation,
             buildMapUrl,
+            scrollToTop,
             startDraw,
             openCapsule
           };
