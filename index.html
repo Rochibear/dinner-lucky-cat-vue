@@ -270,7 +270,7 @@
       .arm-label {
         position: absolute;
         left: 50%;
-        top: 50%;
+        top: 8px;
         display: grid;
         width: 42px;
         height: 42px;
@@ -279,7 +279,7 @@
         border-radius: 50%;
         color: #fffaf1;
         background: var(--cat-accent);
-        transform: translate(-50%, -50%);
+        transform: translateX(-50%);
         font-size: 13px;
         font-weight: 900;
         pointer-events: none;
@@ -853,7 +853,7 @@
 
     <script>
       const { createApp, computed, nextTick, reactive, ref, watch } = Vue;
-      const storageKey = "dinnerLuckyCat.vuePagesState.v1";
+      const storageKey = "dinnerLuckyCat.vuePagesState.v2";
       const today = new Date().toISOString().slice(0, 10);
       const maxDailyCredits = 3;
 
@@ -867,7 +867,7 @@
           const filters = reactive({
             radiusKm: 3,
             transport: "騎車",
-            minimumRating: 4,
+            minimumRating: 3,
             avoid: [],
             preferences: []
           });
@@ -880,9 +880,7 @@
           const revealText = ref("");
           const isLocating = ref(false);
           const currentLocation = ref(loadLocation());
-          const locationStatus = ref(currentLocation.value
-            ? `已使用上次定位，誤差約 ${currentLocation.value.accuracy} 公尺。`
-            : "正在準備詢問目前位置...");
+          const locationStatus = ref("正在準備詢問目前位置...");
           const pendingEntry = ref(null);
           const selectedEntry = ref(state.drawHistoryToday.at(-1) || null);
 
@@ -945,7 +943,7 @@
                     updatedAt: new Date().toISOString()
                   };
                   saveLocation(currentLocation.value);
-                  locationStatus.value = `已定位，誤差約 ${currentLocation.value.accuracy} 公尺。抽選會搜尋附近餐飲店家。`;
+                  locationStatus.value = `已定位：${currentLocation.value.latitude.toFixed(5)}, ${currentLocation.value.longitude.toFixed(5)}，誤差約 ${currentLocation.value.accuracy} 公尺。`;
                   isLocating.value = false;
                   resolve(currentLocation.value);
                 },
@@ -961,8 +959,8 @@
                 },
                 {
                   enableHighAccuracy: true,
-                  timeout: 10000,
-                  maximumAge: 300000
+                  timeout: 12000,
+                  maximumAge: 0
                 }
               );
             });
@@ -1079,11 +1077,24 @@
             return avoidsBlocked && matchesPreference && passesQuality;
           }
 
+          function locationAgeMs() {
+            if (!currentLocation.value?.updatedAt) return Infinity;
+            return Date.now() - new Date(currentLocation.value.updatedAt).getTime();
+          }
+
+          async function ensureFreshLocation() {
+            if (!currentLocation.value || locationAgeMs() > 60000) {
+              await requestLocation();
+            }
+          }
+
           async function fetchNearbyPlaces(snapshot) {
-            if (!currentLocation.value) await requestLocation();
+            await ensureFreshLocation();
 
             const radiusMeters = Math.max(1, snapshot.radiusKm) * 1000;
             const { latitude, longitude } = currentLocation.value;
+            locationStatus.value = `以目前定位搜尋 ${snapshot.radiusKm} 公里內餐飲店家...`;
+
             const query = `
               [out:json][timeout:20];
               (
@@ -1129,13 +1140,19 @@
               .sort((a, b) => a.distance - b.distance);
 
             const filtered = places.filter((place) => matchesFilters(place, snapshot));
-            return filtered.length ? filtered : places;
+            const pool = filtered.length ? filtered : places;
+            locationStatus.value = `已搜尋 ${snapshot.radiusKm} 公里內，找到 ${pool.length} 筆可抽選店家。`;
+            return pool;
           }
 
           async function choosePlace(snapshot) {
             const pool = await fetchNearbyPlaces(snapshot);
             if (!pool.length) throw new Error("No nearby places found.");
-            return pool[Math.floor(Math.random() * pool.length)];
+
+            const existingIds = new Set(state.drawHistoryToday.map((entry) => entry.place.id));
+            const freshPool = pool.filter((place) => !existingIds.has(place.id));
+            const randomPool = freshPool.length ? freshPool : pool;
+            return randomPool[Math.floor(Math.random() * randomPool.length)];
           }
 
           function snapshotFilters() {
@@ -1202,7 +1219,7 @@
               isPulling.value = false;
               isDoorOpen.value = false;
               pendingEntry.value = null;
-              revealText.value = "附近暫時找不到可抽選店家，請放大公里數或重試。";
+              revealText.value = "附近暫時找不到可抽選店家，請放大公里數、確認定位，或稍後重試。";
               return;
             }
 
@@ -1239,9 +1256,7 @@
             { deep: true }
           );
 
-          if (!currentLocation.value) {
-            window.setTimeout(() => requestLocation().catch(() => {}), 700);
-          }
+          window.setTimeout(() => requestLocation().catch(() => {}), 700);
 
           return {
             transportOptions,
