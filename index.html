@@ -775,12 +775,12 @@
           </fieldset>
 
           <fieldset>
-            <legend>最低評價</legend>
+            <legend>資料品質</legend>
             <select v-model.number="filters.minimumRating">
-              <option :value="3">3 星以上</option>
-              <option :value="3.5">3.5 星以上</option>
-              <option :value="4">4 星以上</option>
-              <option :value="4.5">4.5 星以上</option>
+              <option :value="3">顯示 OSM 免費資料</option>
+              <option :value="3.5">優先資料完整</option>
+              <option :value="4">一般篩選</option>
+              <option :value="4.5">嚴格篩選</option>
             </select>
           </fieldset>
 
@@ -811,18 +811,18 @@
         <section id="resultIntro" class="result-card">
           <p class="eyebrow">今日結果</p>
           <h2>{{ selectedEntry?.place.name || '點招財貓手手開始抽選' }}</h2>
-          <p class="muted">{{ selectedEntry?.place.type || '純 Vue / GitHub Pages 版目前使用示範店家資料，不會真的依定位搜尋附近餐廳。之後若接 Google Places API，才會依目前位置找店。' }}</p>
+          <p class="muted">{{ selectedEntry?.place.type || '純 Vue / GitHub Pages 版會用目前定位查 OpenStreetMap 免費店家資料，再手動跳轉 Google Maps 導航。' }}</p>
           <dl class="details">
-            <div><dt>價位</dt><dd>{{ selectedEntry?.place.price || '-' }}</dd></div>
-            <div><dt>評價</dt><dd>{{ selectedEntry ? `${selectedEntry.place.rating} ★` : '-' }}</dd></div>
-            <div><dt>評論</dt><dd>{{ selectedEntry?.place.reviews || '-' }}</dd></div>
+            <div><dt>價位</dt><dd>{{ selectedEntry?.place.price || 'OSM 未提供' }}</dd></div>
+            <div><dt>評價</dt><dd>{{ selectedEntry?.place.rating || 'OSM 無評價資料' }}</dd></div>
+            <div><dt>評論</dt><dd>{{ selectedEntry?.place.reviews || 'OSM 無評論資料' }}</dd></div>
             <div><dt>營業</dt><dd>{{ selectedEntry?.place.hours || '-' }}</dd></div>
             <div><dt>地址</dt><dd>{{ selectedEntry?.place.address || '-' }}</dd></div>
             <div><dt>電話</dt><dd>{{ selectedEntry?.place.phone || '-' }}</dd></div>
             <div><dt>條件</dt><dd>{{ selectedEntry?.filterSummary || '-' }}</dd></div>
           </dl>
           <div class="actions">
-            <a class="action-button" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? `tel:${selectedEntry.place.phone.replaceAll('-', '')}` : '#'">撥打電話</a>
+            <a class="action-button" :class="{ disabled: !selectedEntry?.place.phone }" :href="selectedEntry?.place.phone ? `tel:${selectedEntry.place.phone.replaceAll('-', '')}` : '#'">撥打電話</a>
             <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildMapUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">地圖導航</a>
           </div>
         </section>
@@ -837,7 +837,7 @@
             <button v-for="(entry, index) in state.drawHistoryToday" :key="entry.createdAt" class="history-item" type="button" @click="selectedEntry = entry">
               <span class="history-index">{{ index + 1 }}</span>
               <strong class="history-name">{{ entry.place.name }}</strong>
-              <small class="history-meta">{{ entry.place.rating }} ★ / {{ entry.filters.transport }} / {{ entry.filters.radiusKm }} 公里</small>
+              <small class="history-meta">{{ entry.place.distanceText }} / {{ entry.filters.transport }} / {{ entry.filters.radiusKm }} 公里</small>
             </button>
           </div>
         </section>
@@ -856,87 +856,6 @@
       const storageKey = "dinnerLuckyCat.vuePagesState.v1";
       const today = new Date().toISOString().slice(0, 10);
       const maxDailyCredits = 3;
-
-      const demoPlaces = [
-        {
-          id: "veg-bowl",
-          name: "青禾蔬食飯館",
-          type: "素食 / 健康餐盒",
-          price: "$$",
-          rating: 4.6,
-          reviews: "428 則評論",
-          hours: "今日 11:00-20:30",
-          address: "台北市中正區示範路 18 號",
-          phone: "02-2345-1688",
-          tags: ["素食者", "健康", "澱粉"],
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E9%9D%92%E7%A6%BE%E8%94%AC%E9%A3%9F%E9%A3%AF%E9%A4%A8"
-        },
-        {
-          id: "chicken-grill",
-          name: "金匠炙燒雞腿飯",
-          type: "台式 / 雞肉便當",
-          price: "$",
-          rating: 4.3,
-          reviews: "812 則評論",
-          hours: "今日 10:30-21:00",
-          address: "台北市大安區示範街 56 號",
-          phone: "02-2755-9001",
-          tags: ["肉食主義", "燒烤", "澱粉"],
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E7%82%99%E7%87%92%E9%9B%9E%E8%85%BF%E9%A3%AF"
-        },
-        {
-          id: "noodle",
-          name: "巷口番茄牛肉麵",
-          type: "麵食 / 牛肉麵",
-          price: "$$",
-          rating: 4.5,
-          reviews: "1,203 則評論",
-          hours: "今日 11:30-22:00",
-          address: "台北市信義區晚餐路 99 號",
-          phone: "02-8787-5566",
-          tags: ["牛", "澱粉", "肉食主義"],
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E7%95%AA%E8%8C%84%E7%89%9B%E8%82%89%E9%BA%B5"
-        },
-        {
-          id: "soup",
-          name: "暖月雞湯小館",
-          type: "湯品 / 家常菜",
-          price: "$$",
-          rating: 4.7,
-          reviews: "356 則評論",
-          hours: "今日 17:00-23:00",
-          address: "台北市松山區小館巷 7 號",
-          phone: "02-2712-3300",
-          tags: ["健康", "肉食主義"],
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E9%9B%9E%E6%B9%AF%E5%B0%8F%E9%A4%A8"
-        },
-        {
-          id: "hotpot",
-          name: "福氣個人鍋",
-          type: "火鍋 / 個人鍋",
-          price: "$$",
-          rating: 4.1,
-          reviews: "699 則評論",
-          hours: "今日 11:00-00:00",
-          address: "台北市中山區招財路 88 號",
-          phone: "02-2522-1212",
-          tags: ["火鍋", "牛", "豬", "肉食主義"],
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E5%80%8B%E4%BA%BA%E9%8D%8B"
-        },
-        {
-          id: "salad",
-          name: "日光沙拉所",
-          type: "沙拉 / 輕食",
-          price: "$$",
-          rating: 4.4,
-          reviews: "248 則評論",
-          hours: "今日 09:30-19:30",
-          address: "台北市大同區日光街 12 號",
-          phone: "02-2558-6123",
-          tags: ["健康", "素食者"],
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E6%B2%99%E6%8B%89%E8%BC%95%E9%A3%9F"
-        }
-      ];
 
       createApp({
         setup() {
@@ -1010,57 +929,212 @@
           function requestLocation() {
             if (!navigator.geolocation) {
               locationStatus.value = "這個瀏覽器不支援定位功能。";
-              return;
+              return Promise.reject(new Error("Geolocation is not supported."));
             }
 
             isLocating.value = true;
             locationStatus.value = "正在取得目前位置...";
 
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                currentLocation.value = {
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-                  accuracy: Math.round(position.coords.accuracy),
-                  updatedAt: new Date().toISOString()
-                };
-                saveLocation(currentLocation.value);
-                locationStatus.value = `已定位，誤差約 ${currentLocation.value.accuracy} 公尺。地圖導航會從目前位置出發。`;
-                isLocating.value = false;
-              },
-              (error) => {
-                const messages = {
-                  1: "定位權限被拒絕，請在瀏覽器網址列旁邊允許位置權限。",
-                  2: "目前無法取得位置，請確認裝置定位或網路狀態。",
-                  3: "定位逾時，請再試一次。"
-                };
-                locationStatus.value = messages[error.code] || "定位失敗，請再試一次。";
-                isLocating.value = false;
-              },
-              {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000
-              }
-            );
+            return new Promise((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  currentLocation.value = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: Math.round(position.coords.accuracy),
+                    updatedAt: new Date().toISOString()
+                  };
+                  saveLocation(currentLocation.value);
+                  locationStatus.value = `已定位，誤差約 ${currentLocation.value.accuracy} 公尺。抽選會搜尋附近餐飲店家。`;
+                  isLocating.value = false;
+                  resolve(currentLocation.value);
+                },
+                (error) => {
+                  const messages = {
+                    1: "定位權限被拒絕，請在瀏覽器網址列旁邊允許位置權限。",
+                    2: "目前無法取得位置，請確認裝置定位或網路狀態。",
+                    3: "定位逾時，請再試一次。"
+                  };
+                  locationStatus.value = messages[error.code] || "定位失敗，請再試一次。";
+                  isLocating.value = false;
+                  reject(error);
+                },
+                {
+                  enableHighAccuracy: true,
+                  timeout: 10000,
+                  maximumAge: 300000
+                }
+              );
+            });
           }
 
           function buildSummary(snapshot) {
             const avoid = snapshot.avoid.length ? `不吃：${snapshot.avoid.join("、")}` : "未排除";
             const preferences = snapshot.preferences.length ? `偏好：${snapshot.preferences.join("、")}` : "未選偏好";
-            return `${snapshot.radiusKm} 公里內 / ${snapshot.transport} / ${snapshot.minimumRating} 星以上 / ${avoid} / ${preferences}`;
+            return `${snapshot.radiusKm} 公里內 / ${snapshot.transport} / OSM 免費店家資料 / ${avoid} / ${preferences}`;
           }
 
-          function choosePlace(snapshot) {
-            const candidates = demoPlaces.filter((place) => {
-              const passesRating = place.rating >= snapshot.minimumRating;
-              const avoidsBlocked = !snapshot.avoid.some((avoid) => place.tags.includes(avoid));
-              const matchesPreference = !snapshot.preferences.length || snapshot.preferences.some((pref) => place.tags.includes(pref));
-              return passesRating && avoidsBlocked && matchesPreference;
-            });
+          function distanceInMeters(from, to) {
+            const earthRadius = 6371000;
+            const toRad = (value) => value * Math.PI / 180;
+            const dLat = toRad(to.latitude - from.latitude);
+            const dLon = toRad(to.longitude - from.longitude);
+            const lat1 = toRad(from.latitude);
+            const lat2 = toRad(to.latitude);
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+            return 2 * earthRadius * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          }
 
-            const fallback = demoPlaces.filter((place) => place.rating >= snapshot.minimumRating);
-            const pool = candidates.length ? candidates : fallback.length ? fallback : demoPlaces;
+          function formatDistance(meters) {
+            if (meters < 1000) return `${Math.round(meters)} 公尺`;
+            return `${(meters / 1000).toFixed(1)} 公里`;
+          }
+
+          function foodType(tags) {
+            const amenityMap = {
+              restaurant: "餐廳",
+              cafe: "咖啡 / 輕食",
+              fast_food: "速食",
+              food_court: "美食廣場",
+              bar: "酒吧",
+              pub: "酒吧 / 餐酒館"
+            };
+
+            if (tags.shop === "bakery") return "麵包店";
+            if (tags.cuisine) return `${amenityMap[tags.amenity] || "餐飲"} / ${tags.cuisine}`;
+            return amenityMap[tags.amenity] || "餐飲";
+          }
+
+          function addressFromTags(tags) {
+            if (tags["addr:full"]) return tags["addr:full"];
+            const parts = [
+              tags["addr:city"],
+              tags["addr:district"],
+              tags["addr:street"],
+              tags["addr:housenumber"]
+            ].filter(Boolean);
+            return parts.length ? parts.join("") : "";
+          }
+
+          function tagsForFiltering(tags) {
+            const text = [
+              tags.name,
+              tags.cuisine,
+              tags.amenity,
+              tags.shop,
+              tags.diet,
+              tags.description
+            ].filter(Boolean).join(" ").toLowerCase();
+
+            const mapped = [];
+            if (/beef|steak|牛/.test(text)) mapped.push("牛");
+            if (/pork|豬|豚/.test(text)) mapped.push("豬");
+            if (/lamb|mutton|羊/.test(text)) mapped.push("羊");
+            if (/fish|seafood|sushi|魚|海鮮|壽司/.test(text)) mapped.push("魚");
+            if (/noodle|rice|pasta|pizza|麵|飯|義大利|披薩/.test(text)) mapped.push("澱粉");
+            if (/fried|炸/.test(text)) mapped.push("炸物");
+            if (/hotpot|火鍋|鍋/.test(text)) mapped.push("火鍋");
+            if (/bbq|barbecue|grill|燒烤|烤/.test(text)) mapped.push("燒烤");
+            if (/convenience|便利/.test(text)) mapped.push("便利超商");
+            if (/vegetarian|vegan|素/.test(text)) mapped.push("素食者");
+            if (/salad|healthy|organic|健康|沙拉|有機/.test(text)) mapped.push("健康");
+            if (/meat|beef|pork|chicken|steak|肉|牛|豬|雞/.test(text)) mapped.push("肉食主義");
+            return mapped;
+          }
+
+          function toPlace(element) {
+            const tags = element.tags || {};
+            const latitude = element.lat || element.center?.lat;
+            const longitude = element.lon || element.center?.lon;
+            if (!latitude || !longitude || !tags.name) return null;
+
+            const distance = currentLocation.value
+              ? distanceInMeters(currentLocation.value, { latitude, longitude })
+              : 0;
+
+            return {
+              id: `${element.type}-${element.id}`,
+              name: tags.name,
+              type: foodType(tags),
+              price: "OSM 未提供",
+              rating: "",
+              reviews: "",
+              hours: tags.opening_hours || "",
+              address: addressFromTags(tags),
+              phone: tags.phone || tags["contact:phone"] || "",
+              latitude,
+              longitude,
+              distance,
+              distanceText: formatDistance(distance),
+              tags: tagsForFiltering(tags),
+              mapUrl: `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
+            };
+          }
+
+          function matchesFilters(place, snapshot) {
+            const avoidsBlocked = !snapshot.avoid.some((avoid) => place.tags.includes(avoid));
+            const matchesPreference = !snapshot.preferences.length || snapshot.preferences.some((pref) => place.tags.includes(pref));
+            const hasUsefulDetails = Boolean(place.phone || place.hours || place.address);
+            const passesQuality = snapshot.minimumRating < 3.5 || hasUsefulDetails;
+            return avoidsBlocked && matchesPreference && passesQuality;
+          }
+
+          async function fetchNearbyPlaces(snapshot) {
+            if (!currentLocation.value) await requestLocation();
+
+            const radiusMeters = Math.max(1, snapshot.radiusKm) * 1000;
+            const { latitude, longitude } = currentLocation.value;
+            const query = `
+              [out:json][timeout:20];
+              (
+                node["amenity"~"^(restaurant|cafe|fast_food|food_court|bar|pub)$"](around:${radiusMeters},${latitude},${longitude});
+                way["amenity"~"^(restaurant|cafe|fast_food|food_court|bar|pub)$"](around:${radiusMeters},${latitude},${longitude});
+                relation["amenity"~"^(restaurant|cafe|fast_food|food_court|bar|pub)$"](around:${radiusMeters},${latitude},${longitude});
+                node["shop"="bakery"](around:${radiusMeters},${latitude},${longitude});
+                way["shop"="bakery"](around:${radiusMeters},${latitude},${longitude});
+                relation["shop"="bakery"](around:${radiusMeters},${latitude},${longitude});
+              );
+              out body center 80;
+            `;
+
+            const endpoints = [
+              "https://overpass-api.de/api/interpreter",
+              "https://overpass.kumi.systems/api/interpreter"
+            ];
+            let data = null;
+
+            for (const endpoint of endpoints) {
+              try {
+                const response = await fetch(endpoint, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                  body: `data=${encodeURIComponent(query)}`
+                });
+
+                if (response.ok) {
+                  data = await response.json();
+                  break;
+                }
+              } catch {
+                data = null;
+              }
+            }
+
+            if (!data) throw new Error("Overpass request failed.");
+
+            const places = (data.elements || [])
+              .map(toPlace)
+              .filter(Boolean)
+              .filter((place) => place.distance <= radiusMeters)
+              .sort((a, b) => a.distance - b.distance);
+
+            const filtered = places.filter((place) => matchesFilters(place, snapshot));
+            return filtered.length ? filtered : places;
+          }
+
+          async function choosePlace(snapshot) {
+            const pool = await fetchNearbyPlaces(snapshot);
+            if (!pool.length) throw new Error("No nearby places found.");
             return pool[Math.floor(Math.random() * pool.length)];
           }
 
@@ -1085,7 +1159,7 @@
             if (!currentLocation.value) return entry.place.mapUrl;
 
             const origin = `${currentLocation.value.latitude},${currentLocation.value.longitude}`;
-            const destination = encodeURIComponent(entry.place.address || entry.place.name);
+            const destination = `${entry.place.latitude},${entry.place.longitude}`;
             const mode = travelModeForMaps(entry.filters.transport);
             return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${mode}`;
           }
@@ -1100,25 +1174,38 @@
             window.scrollTo({ top: 0, behavior: "smooth" });
           }
 
-          function startDraw() {
+          async function startDraw() {
             if (remainingCredits.value === 0) {
               revealText.value = "今日 3 次已用完";
               return;
             }
 
-            const filterSnapshot = snapshotFilters();
-            pendingEntry.value = {
-              place: choosePlace(filterSnapshot),
-              filters: filterSnapshot,
-              filterSummary: buildSummary(filterSnapshot),
-              createdAt: new Date().toISOString()
-            };
+            if (isDrawing.value) return;
 
+            const filterSnapshot = snapshotFilters();
             isDrawing.value = true;
             isPulling.value = true;
             isDoorOpen.value = true;
             showCapsule.value = false;
             capsuleOpened.value = false;
+            revealText.value = "正在搜尋附近店家...";
+
+            try {
+              pendingEntry.value = {
+                place: await choosePlace(filterSnapshot),
+                filters: filterSnapshot,
+                filterSummary: buildSummary(filterSnapshot),
+                createdAt: new Date().toISOString()
+              };
+            } catch {
+              isDrawing.value = false;
+              isPulling.value = false;
+              isDoorOpen.value = false;
+              pendingEntry.value = null;
+              revealText.value = "附近暫時找不到可抽選店家，請放大公里數或重試。";
+              return;
+            }
+
             revealText.value = "";
 
             window.setTimeout(() => {
@@ -1153,7 +1240,7 @@
           );
 
           if (!currentLocation.value) {
-            window.setTimeout(requestLocation, 700);
+            window.setTimeout(() => requestLocation().catch(() => {}), 700);
           }
 
           return {
