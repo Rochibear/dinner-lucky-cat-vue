@@ -423,6 +423,40 @@
         background: #fffaf1;
       }
 
+      .location-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 12px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 250, 241, 0.86);
+      }
+
+      .location-row p {
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .location-button {
+        flex: 0 0 auto;
+        min-height: 40px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 8px;
+        color: #fffaf1;
+        background: var(--jade);
+        cursor: pointer;
+        font-weight: 900;
+      }
+
+      .location-button:disabled {
+        opacity: 0.55;
+        cursor: wait;
+      }
+
       .right-pane {
         display: grid;
         align-content: start;
@@ -609,6 +643,11 @@
         .controls {
           grid-template-columns: 1fr;
         }
+
+        .location-row {
+          align-items: stretch;
+          flex-direction: column;
+        }
       }
     </style>
   </head>
@@ -697,6 +736,13 @@
             </div>
           </fieldset>
         </form>
+
+        <div class="location-row">
+          <p>{{ locationStatus }}</p>
+          <button class="location-button" type="button" :disabled="isLocating" @click="requestLocation">
+            {{ isLocating ? '定位中' : '使用目前位置' }}
+          </button>
+        </div>
       </section>
 
       <aside class="right-pane">
@@ -715,7 +761,7 @@
           </dl>
           <div class="actions">
             <a class="action-button" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? `tel:${selectedEntry.place.phone.replaceAll('-', '')}` : '#'">撥打電話</a>
-            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry?.place.mapUrl || '#'" target="_blank" rel="noreferrer">地圖導航</a>
+            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildMapUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">地圖導航</a>
           </div>
         </section>
 
@@ -849,6 +895,9 @@
           const showCapsule = ref(false);
           const capsuleOpened = ref(false);
           const revealText = ref("");
+          const isLocating = ref(false);
+          const locationStatus = ref("尚未定位；按下後會請瀏覽器取得目前位置。");
+          const currentLocation = ref(loadLocation());
           const pendingEntry = ref(null);
           const selectedEntry = ref(state.drawHistoryToday.at(-1) || null);
 
@@ -880,6 +929,56 @@
             localStorage.setItem(storageKey, JSON.stringify(state));
           }
 
+          function loadLocation() {
+            try {
+              return JSON.parse(localStorage.getItem(`${storageKey}.location`));
+            } catch {
+              return null;
+            }
+          }
+
+          function saveLocation(location) {
+            localStorage.setItem(`${storageKey}.location`, JSON.stringify(location));
+          }
+
+          function requestLocation() {
+            if (!navigator.geolocation) {
+              locationStatus.value = "這個瀏覽器不支援定位功能。";
+              return;
+            }
+
+            isLocating.value = true;
+            locationStatus.value = "正在取得目前位置...";
+
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                currentLocation.value = {
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                  accuracy: Math.round(position.coords.accuracy),
+                  updatedAt: new Date().toISOString()
+                };
+                saveLocation(currentLocation.value);
+                locationStatus.value = `已定位，誤差約 ${currentLocation.value.accuracy} 公尺。地圖導航會從目前位置出發。`;
+                isLocating.value = false;
+              },
+              (error) => {
+                const messages = {
+                  1: "定位權限被拒絕，請在瀏覽器網址列旁邊允許位置權限。",
+                  2: "目前無法取得位置，請確認裝置定位或網路狀態。",
+                  3: "定位逾時，請再試一次。"
+                };
+                locationStatus.value = messages[error.code] || "定位失敗，請再試一次。";
+                isLocating.value = false;
+              },
+              {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+              }
+            );
+          }
+
           function buildSummary(snapshot) {
             const avoid = snapshot.avoid.length ? `不吃：${snapshot.avoid.join("、")}` : "未排除";
             const preferences = snapshot.preferences.length ? `偏好：${snapshot.preferences.join("、")}` : "未選偏好";
@@ -907,6 +1006,21 @@
               avoid: [...filters.avoid],
               preferences: [...filters.preferences]
             };
+          }
+
+          function travelModeForMaps(transport) {
+            if (transport === "大眾運輸") return "transit";
+            if (transport === "腳踏車") return "bicycling";
+            return "driving";
+          }
+
+          function buildMapUrl(entry) {
+            if (!currentLocation.value) return entry.place.mapUrl;
+
+            const origin = `${currentLocation.value.latitude},${currentLocation.value.longitude}`;
+            const destination = encodeURIComponent(entry.place.address || entry.place.name);
+            const mode = travelModeForMaps(entry.filters.transport);
+            return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${mode}`;
           }
 
           function startDraw() {
@@ -973,8 +1087,12 @@
             showCapsule,
             capsuleOpened,
             revealText,
+            isLocating,
+            locationStatus,
             selectedEntry,
             remainingCredits,
+            requestLocation,
+            buildMapUrl,
             startDraw,
             openCapsule
           };
