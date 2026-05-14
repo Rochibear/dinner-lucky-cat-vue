@@ -749,7 +749,7 @@
         <section class="result-card">
           <p class="eyebrow">今日結果</p>
           <h2>{{ selectedEntry?.place.name || '點招財貓手手開始抽選' }}</h2>
-          <p class="muted">{{ selectedEntry?.place.type || '純 Vue / GitHub Pages 版，先使用示範店家資料。之後若接 Google Maps，API key 會暴露在前端。' }}</p>
+          <p class="muted">{{ selectedEntry?.place.type || '純 Vue / GitHub Pages 版目前使用示範店家資料，不會真的依定位搜尋附近餐廳。之後若接 Google Places API，才會依目前位置找店。' }}</p>
           <dl class="details">
             <div><dt>價位</dt><dd>{{ selectedEntry?.place.price || '-' }}</dd></div>
             <div><dt>評價</dt><dd>{{ selectedEntry ? `${selectedEntry.place.rating} ★` : '-' }}</dd></div>
@@ -876,7 +876,7 @@
 
       createApp({
         setup() {
-          const transportOptions = ["騎車", "開車", "腳踏車", "大眾運輸"];
+          const transportOptions = ["騎車", "開車", "腳踏車", "步行", "大眾運輸"];
           const avoidOptions = ["牛", "豬", "羊", "魚", "澱粉", "炸物", "火鍋", "燒烤", "便利超商", "泡麵"];
           const preferenceOptions = ["素食者", "健康", "肉食主義"];
 
@@ -1013,6 +1013,7 @@
           function travelModeForMaps(transport) {
             if (transport === "大眾運輸") return "transit";
             if (transport === "腳踏車") return "bicycling";
+            if (transport === "步行") return "walking";
             return "driving";
           }
 
