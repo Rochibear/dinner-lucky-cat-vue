@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>晚餐吃什麼招財貓</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <style>
+      :root {
+        --bg: #f7efe4;
+        --ink: #241c18;
+        --muted: #75685d;
+        --paper: #fffaf1;
+        --line: #ded1bf;
+        --red: #c83d30;
+        --gold: #d8a12c;
+        --jade: #2c8c72;
+        --blue: #2f6f9f;
+        --shadow: 0 22px 60px rgba(58, 37, 20, 0.16);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        color: var(--ink);
+        background:
+          linear-gradient(135deg, rgba(216, 161, 44, 0.16), transparent 38%),
+          linear-gradient(315deg, rgba(47, 111, 159, 0.14), transparent 42%),
+          var(--bg);
+        font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", Arial, sans-serif;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.75fr);
+        gap: 24px;
+        width: min(1440px, 100%);
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .hero-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(28px, 4vw, 54px);
+        line-height: 1.04;
+        font-weight: 900;
+      }
+
+      h2 {
+        font-size: 24px;
+        line-height: 1.2;
+        font-weight: 900;
+      }
+
+      .eyebrow {
+        margin-bottom: 6px;
+        color: var(--red);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .credit-pill {
+        flex: 0 0 auto;
+        padding: 12px 16px;
+        border: 1px solid rgba(200, 61, 48, 0.34);
+        border-radius: 999px;
+        background: rgba(255, 250, 241, 0.88);
+        box-shadow: 0 12px 28px rgba(58, 37, 20, 0.1);
+        font-weight: 800;
+      }
+
+      .credit-pill strong {
+        color: var(--red);
+      }
+
+      .stage {
+        position: relative;
+        display: grid;
+        min-height: 540px;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgba(255, 250, 241, 0.94), rgba(248, 228, 198, 0.88)),
+          repeating-linear-gradient(90deg, transparent 0 56px, rgba(216, 161, 44, 0.08) 56px 57px);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .cat-switch {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        display: flex;
+        gap: 8px;
+        z-index: 4;
+      }
+
+      .theme-button,
+      .action-button,
+      .history-item {
+        border: 0;
+        cursor: pointer;
+      }
+
+      .theme-button {
+        padding: 9px 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--ink);
+        background: rgba(255, 250, 241, 0.9);
+        font-weight: 900;
+      }
+
+      .theme-button.active {
+        color: #fffaf1;
+        background: var(--ink);
+        border-color: var(--ink);
+      }
+
+      .cat-wrap {
+        position: relative;
+        width: min(460px, 92vw);
+        height: 500px;
+      }
+
+      .cat {
+        --cat-base: #fff7e8;
+        --cat-line: #31251e;
+        --cat-accent: #c83d30;
+        position: absolute;
+        inset: 56px 52px 30px 52px;
+      }
+
+      .cat-wrap.black .cat {
+        --cat-base: #181513;
+        --cat-line: #d8a12c;
+        --cat-accent: #d8a12c;
+      }
+
+      .ear {
+        position: absolute;
+        top: 10px;
+        width: 86px;
+        height: 86px;
+        border: 5px solid var(--cat-line);
+        background: var(--cat-base);
+        transform: rotate(45deg);
+      }
+
+      .ear.left { left: 72px; }
+      .ear.right { right: 72px; }
+
+      .head {
+        position: absolute;
+        left: 50%;
+        top: 28px;
+        width: 210px;
+        height: 178px;
+        border: 5px solid var(--cat-line);
+        border-radius: 48% 48% 42% 42%;
+        background: var(--cat-base);
+        transform: translateX(-50%);
+        z-index: 2;
+      }
+
+      .eye {
+        position: absolute;
+        top: 72px;
+        width: 16px;
+        height: 24px;
+        border-radius: 999px;
+        background: var(--cat-line);
+      }
+
+      .eye.left { left: 62px; }
+      .eye.right { right: 62px; }
+
+      .nose {
+        position: absolute;
+        left: 50%;
+        top: 100px;
+        width: 18px;
+        height: 13px;
+        border-radius: 50%;
+        background: var(--cat-accent);
+        transform: translateX(-50%);
+      }
+
+      .whisker {
+        position: absolute;
+        width: 46px;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--cat-line);
+      }
+
+      .w1 { left: 24px; top: 104px; transform: rotate(8deg); }
+      .w2 { left: 24px; top: 124px; transform: rotate(-8deg); }
+      .w3 { right: 24px; top: 104px; transform: rotate(-8deg); }
+      .w4 { right: 24px; top: 124px; transform: rotate(8deg); }
+
+      .body {
+        position: absolute;
+        left: 50%;
+        bottom: 36px;
+        width: 260px;
+        height: 260px;
+        border: 5px solid var(--cat-line);
+        border-radius: 46% 46% 34% 34%;
+        background: var(--cat-base);
+        transform: translateX(-50%);
+      }
+
+      .arm {
+        position: absolute;
+        right: 44px;
+        top: 154px;
+        width: 64px;
+        height: 180px;
+        padding: 0;
+        border: 5px solid var(--cat-line);
+        border-radius: 40px;
+        background: var(--cat-base);
+        cursor: pointer;
+        transform-origin: 50% 92%;
+        animation: wave 1.8s ease-in-out infinite;
+        z-index: 3;
+      }
+
+      .arm::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 12px;
+        width: 30px;
+        height: 30px;
+        border: 4px solid var(--cat-line);
+        border-radius: 50%;
+        background: var(--cat-accent);
+        transform: translateX(-50%);
+      }
+
+      .arm:disabled {
+        opacity: 0.44;
+        cursor: not-allowed;
+      }
+
+      .cat-wrap.pulling .arm {
+        animation: tapArm 0.7s ease-in-out;
+      }
+
+      .coin-door {
+        position: absolute;
+        left: 50%;
+        top: 78px;
+        display: grid;
+        width: 118px;
+        height: 118px;
+        place-items: center;
+        border: 5px solid var(--cat-line);
+        border-radius: 50%;
+        color: #7a461f;
+        background: var(--gold);
+        transform: translateX(-50%);
+        transition: transform 0.36s ease, opacity 0.36s ease;
+        transform-origin: top center;
+        font-size: 42px;
+        font-weight: 900;
+      }
+
+      .cat-wrap.open .coin-door {
+        opacity: 0.2;
+        transform: translateX(-50%) rotateX(78deg);
+      }
+
+      .paw {
+        position: absolute;
+        bottom: 28px;
+        width: 84px;
+        height: 54px;
+        border: 5px solid var(--cat-line);
+        border-radius: 40px 40px 28px 28px;
+        background: var(--cat-base);
+        z-index: 3;
+      }
+
+      .paw.left { left: 100px; }
+      .paw.right { right: 100px; }
+
+      .capsule {
+        position: absolute;
+        left: 50%;
+        top: 310px;
+        width: 92px;
+        height: 92px;
+        padding: 0;
+        border: 5px solid #7d5140;
+        border-radius: 50%;
+        background: linear-gradient(180deg, var(--red) 0 49%, #fff 50% 100%);
+        transform: translateX(-50%);
+        z-index: 8;
+        animation: dropCapsule 0.72s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+      }
+
+      .capsule span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 26px;
+        height: 26px;
+        border: 4px solid #7d5140;
+        border-radius: 50%;
+        background: var(--gold);
+        transform: translate(-50%, -50%);
+      }
+
+      .capsule.opened {
+        animation: popCapsule 0.5s ease forwards;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .reveal {
+        position: absolute;
+        left: 50%;
+        top: 280px;
+        width: min(340px, 80vw);
+        padding: 18px;
+        border: 4px solid var(--ink);
+        border-radius: 8px;
+        background: #fffaf1;
+        box-shadow: 0 18px 38px rgba(58, 37, 20, 0.22);
+        text-align: center;
+        transform: translateX(-50%);
+        z-index: 9;
+        font-size: 24px;
+        font-weight: 900;
+        animation: revealPrize 0.46s ease both;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      fieldset {
+        min-width: 0;
+        margin: 0;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 250, 241, 0.86);
+      }
+
+      legend {
+        padding: 0 6px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .segmented,
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .segmented label,
+      .chips label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 34px;
+        padding: 7px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fffaf1;
+        font-weight: 800;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--red);
+      }
+
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fffaf1;
+      }
+
+      .right-pane {
+        display: grid;
+        align-content: start;
+        gap: 16px;
+      }
+
+      .result-card,
+      .history-card,
+      .notice-card {
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 250, 241, 0.94);
+        box-shadow: var(--shadow);
+      }
+
+      .muted {
+        margin-top: 8px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .details {
+        display: grid;
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .details div {
+        display: grid;
+        grid-template-columns: 76px 1fr;
+        gap: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(117, 104, 93, 0.22);
+      }
+
+      dt {
+        color: var(--muted);
+        font-weight: 900;
+      }
+
+      dd {
+        min-width: 0;
+        margin: 0;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 8px;
+        color: #fffaf1;
+        background: var(--red);
+        text-decoration: none;
+        font-weight: 900;
+      }
+
+      .action-button.secondary {
+        background: var(--blue);
+      }
+
+      .action-button.disabled {
+        opacity: 0.42;
+        pointer-events: none;
+      }
+
+      .section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .history-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .history-item {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 4px 10px;
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--ink);
+        background: #fffaf1;
+        text-align: left;
+      }
+
+      .history-index {
+        grid-row: span 2;
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 50%;
+        color: #fffaf1;
+        background: var(--jade);
+        font-weight: 900;
+      }
+
+      .history-name {
+        overflow-wrap: anywhere;
+      }
+
+      .history-meta,
+      .empty-history {
+        color: var(--muted);
+      }
+
+      .empty-history {
+        padding: 16px;
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        background: rgba(255, 250, 241, 0.62);
+      }
+
+      @keyframes wave {
+        0%, 100% { transform: rotate(-8deg); }
+        50% { transform: rotate(10deg); }
+      }
+
+      @keyframes tapArm {
+        0%, 100% { transform: rotate(-8deg); }
+        45% { transform: rotate(22deg) translateY(8px); }
+      }
+
+      @keyframes dropCapsule {
+        0% { opacity: 0; transform: translate(-50%, -130px) scale(0.78); }
+        70% { opacity: 1; transform: translate(-50%, 20px) scale(1.04); }
+        100% { transform: translate(-50%, 0) scale(1); }
+      }
+
+      @keyframes popCapsule {
+        100% { opacity: 0; transform: translateX(-50%) scale(1.55) rotate(18deg); }
+      }
+
+      @keyframes revealPrize {
+        0% { opacity: 0; transform: translate(-50%, 20px) scale(0.88); }
+        100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+      }
+
+      @media (max-width: 1120px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .controls {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 680px) {
+        .app {
+          padding: 14px;
+        }
+
+        .hero-bar,
+        .actions {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .stage {
+          min-height: 470px;
+        }
+
+        .cat-wrap {
+          transform: scale(0.86);
+        }
+
+        .controls {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app" class="app" v-cloak>
+      <section>
+        <header class="hero-bar">
+          <div>
+            <p class="eyebrow">Vue Static Beta</p>
+            <h1>晚餐吃什麼招財貓</h1>
+          </div>
+          <div class="credit-pill">今日機會 <strong>{{ remainingCredits }}/{{ state.dailyCredits }}</strong></div>
+        </header>
+
+        <div class="stage">
+          <div class="cat-switch" aria-label="招財貓款式">
+            <button class="theme-button" :class="{ active: theme === 'white' }" type="button" @click="theme = 'white'">白貓</button>
+            <button class="theme-button" :class="{ active: theme === 'black' }" type="button" @click="theme = 'black'">黑金</button>
+          </div>
+
+          <div class="cat-wrap" :class="{ black: theme === 'black', pulling: isPulling, open: isDoorOpen }">
+            <div class="cat" aria-hidden="true">
+              <div class="ear left"></div>
+              <div class="ear right"></div>
+              <div class="head">
+                <span class="eye left"></span>
+                <span class="eye right"></span>
+                <span class="nose"></span>
+                <span class="whisker w1"></span>
+                <span class="whisker w2"></span>
+                <span class="whisker w3"></span>
+                <span class="whisker w4"></span>
+              </div>
+              <button class="arm" type="button" :disabled="isDrawing || remainingCredits === 0" aria-label="點招財貓手手抽晚餐" @click="startDraw"></button>
+              <div class="body">
+                <div class="coin-door"><span>福</span></div>
+              </div>
+              <div class="paw left"></div>
+              <div class="paw right"></div>
+            </div>
+
+            <button class="capsule" :class="{ hidden: !showCapsule, opened: capsuleOpened }" type="button" aria-label="打開扭蛋" @click="openCapsule">
+              <span></span>
+            </button>
+            <div class="reveal" :class="{ hidden: !revealText }" aria-live="polite">{{ revealText }}</div>
+          </div>
+        </div>
+
+        <form class="controls" @submit.prevent>
+          <fieldset>
+            <legend>距離</legend>
+            <label>
+              <input v-model.number="filters.radiusKm" type="range" min="1" max="10" />
+              <span><strong>{{ filters.radiusKm }}</strong> 公里</span>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>交通</legend>
+            <div class="segmented">
+              <label v-for="item in transportOptions" :key="item"><input v-model="filters.transport" type="radio" :value="item" />{{ item }}</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>最低評價</legend>
+            <select v-model.number="filters.minimumRating">
+              <option :value="3">3 星以上</option>
+              <option :value="3.5">3.5 星以上</option>
+              <option :value="4">4 星以上</option>
+              <option :value="4.5">4.5 星以上</option>
+            </select>
+          </fieldset>
+
+          <fieldset>
+            <legend>不吃</legend>
+            <div class="chips">
+              <label v-for="item in avoidOptions" :key="item"><input v-model="filters.avoid" type="checkbox" :value="item" />{{ item }}</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>你是</legend>
+            <div class="chips">
+              <label v-for="item in preferenceOptions" :key="item"><input v-model="filters.preferences" type="checkbox" :value="item" />{{ item }}</label>
+            </div>
+          </fieldset>
+        </form>
+      </section>
+
+      <aside class="right-pane">
+        <section class="result-card">
+          <p class="eyebrow">今日結果</p>
+          <h2>{{ selectedEntry?.place.name || '點招財貓手手開始抽選' }}</h2>
+          <p class="muted">{{ selectedEntry?.place.type || '純 Vue / GitHub Pages 版，先使用示範店家資料。之後若接 Google Maps，API key 會暴露在前端。' }}</p>
+          <dl class="details">
+            <div><dt>價位</dt><dd>{{ selectedEntry?.place.price || '-' }}</dd></div>
+            <div><dt>評價</dt><dd>{{ selectedEntry ? `${selectedEntry.place.rating} ★` : '-' }}</dd></div>
+            <div><dt>評論</dt><dd>{{ selectedEntry?.place.reviews || '-' }}</dd></div>
+            <div><dt>營業</dt><dd>{{ selectedEntry?.place.hours || '-' }}</dd></div>
+            <div><dt>地址</dt><dd>{{ selectedEntry?.place.address || '-' }}</dd></div>
+            <div><dt>電話</dt><dd>{{ selectedEntry?.place.phone || '-' }}</dd></div>
+            <div><dt>條件</dt><dd>{{ selectedEntry?.filterSummary || '-' }}</dd></div>
+          </dl>
+          <div class="actions">
+            <a class="action-button" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? `tel:${selectedEntry.place.phone.replaceAll('-', '')}` : '#'">撥打電話</a>
+            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry?.place.mapUrl || '#'" target="_blank" rel="noreferrer">地圖導航</a>
+          </div>
+        </section>
+
+        <section class="history-card">
+          <div class="section-heading">
+            <p class="eyebrow">最多三筆</p>
+            <h2>當日抽選紀錄</h2>
+          </div>
+          <div class="history-list">
+            <p v-if="state.drawHistoryToday.length === 0" class="empty-history">今天還沒有抽選紀錄。</p>
+            <button v-for="(entry, index) in state.drawHistoryToday" :key="entry.createdAt" class="history-item" type="button" @click="selectedEntry = entry">
+              <span class="history-index">{{ index + 1 }}</span>
+              <strong class="history-name">{{ entry.place.name }}</strong>
+              <small class="history-meta">{{ entry.place.rating }} ★ / {{ entry.filters.transport }} / {{ entry.filters.radiusKm }} 公里</small>
+            </button>
+          </div>
+        </section>
+
+        <section class="notice-card">
+          <p class="eyebrow">GitHub Pages Beta</p>
+          <p class="muted">目前資料只存在同一台裝置、同一個瀏覽器。不同電腦、無痕模式或清除瀏覽器資料後，抽選紀錄不會保留。</p>
+        </section>
+      </aside>
+    </main>
+
+    <script>
+      const { createApp, computed, nextTick, reactive, ref, watch } = Vue;
+      const storageKey = "dinnerLuckyCat.vuePagesState.v1";
+      const today = new Date().toISOString().slice(0, 10);
+      const maxDailyCredits = 3;
+
+      const demoPlaces = [
+        {
+          id: "veg-bowl",
+          name: "青禾蔬食飯館",
+          type: "素食 / 健康餐盒",
+          price: "$$",
+          rating: 4.6,
+          reviews: "428 則評論",
+          hours: "今日 11:00-20:30",
+          address: "台北市中正區示範路 18 號",
+          phone: "02-2345-1688",
+          tags: ["素食者", "健康", "澱粉"],
+          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E9%9D%92%E7%A6%BE%E8%94%AC%E9%A3%9F%E9%A3%AF%E9%A4%A8"
+        },
+        {
+          id: "chicken-grill",
+          name: "金匠炙燒雞腿飯",
+          type: "台式 / 雞肉便當",
+          price: "$",
+          rating: 4.3,
+          reviews: "812 則評論",
+          hours: "今日 10:30-21:00",
+          address: "台北市大安區示範街 56 號",
+          phone: "02-2755-9001",
+          tags: ["肉食主義", "燒烤", "澱粉"],
+          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E7%82%99%E7%87%92%E9%9B%9E%E8%85%BF%E9%A3%AF"
+        },
+        {
+          id: "noodle",
+          name: "巷口番茄牛肉麵",
+          type: "麵食 / 牛肉麵",
+          price: "$$",
+          rating: 4.5,
+          reviews: "1,203 則評論",
+          hours: "今日 11:30-22:00",
+          address: "台北市信義區晚餐路 99 號",
+          phone: "02-8787-5566",
+          tags: ["牛", "澱粉", "肉食主義"],
+          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E7%95%AA%E8%8C%84%E7%89%9B%E8%82%89%E9%BA%B5"
+        },
+        {
+          id: "soup",
+          name: "暖月雞湯小館",
+          type: "湯品 / 家常菜",
+          price: "$$",
+          rating: 4.7,
+          reviews: "356 則評論",
+          hours: "今日 17:00-23:00",
+          address: "台北市松山區小館巷 7 號",
+          phone: "02-2712-3300",
+          tags: ["健康", "肉食主義"],
+          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E9%9B%9E%E6%B9%AF%E5%B0%8F%E9%A4%A8"
+        },
+        {
+          id: "hotpot",
+          name: "福氣個人鍋",
+          type: "火鍋 / 個人鍋",
+          price: "$$",
+          rating: 4.1,
+          reviews: "699 則評論",
+          hours: "今日 11:00-00:00",
+          address: "台北市中山區招財路 88 號",
+          phone: "02-2522-1212",
+          tags: ["火鍋", "牛", "豬", "肉食主義"],
+          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E5%80%8B%E4%BA%BA%E9%8D%8B"
+        },
+        {
+          id: "salad",
+          name: "日光沙拉所",
+          type: "沙拉 / 輕食",
+          price: "$$",
+          rating: 4.4,
+          reviews: "248 則評論",
+          hours: "今日 09:30-19:30",
+          address: "台北市大同區日光街 12 號",
+          phone: "02-2558-6123",
+          tags: ["健康", "素食者"],
+          mapUrl: "https://www.google.com/maps/search/?api=1&query=%E6%B2%99%E6%8B%89%E8%BC%95%E9%A3%9F"
+        }
+      ];
+
+      createApp({
+        setup() {
+          const transportOptions = ["騎車", "開車", "腳踏車", "大眾運輸"];
+          const avoidOptions = ["牛", "豬", "羊", "魚", "澱粉", "炸物", "火鍋", "燒烤", "便利超商", "泡麵"];
+          const preferenceOptions = ["素食者", "健康", "肉食主義"];
+
+          const state = reactive(loadState());
+          const filters = reactive({
+            radiusKm: 3,
+            transport: "騎車",
+            minimumRating: 4,
+            avoid: [],
+            preferences: []
+          });
+          const theme = ref("white");
+          const isDrawing = ref(false);
+          const isPulling = ref(false);
+          const isDoorOpen = ref(false);
+          const showCapsule = ref(false);
+          const capsuleOpened = ref(false);
+          const revealText = ref("");
+          const pendingEntry = ref(null);
+          const selectedEntry = ref(state.drawHistoryToday.at(-1) || null);
+
+          const remainingCredits = computed(() => Math.max(state.dailyCredits - state.usedCreditsToday, 0));
+
+          function loadState() {
+            const fallback = {
+              date: today,
+              dailyCredits: maxDailyCredits,
+              usedCreditsToday: 0,
+              drawHistoryToday: []
+            };
+
+            try {
+              const stored = JSON.parse(localStorage.getItem(storageKey));
+              if (!stored || stored.date !== today) return fallback;
+
+              return {
+                ...fallback,
+                ...stored,
+                drawHistoryToday: Array.isArray(stored.drawHistoryToday) ? stored.drawHistoryToday.slice(0, 3) : []
+              };
+            } catch {
+              return fallback;
+            }
+          }
+
+          function saveState() {
+            localStorage.setItem(storageKey, JSON.stringify(state));
+          }
+
+          function buildSummary(snapshot) {
+            const avoid = snapshot.avoid.length ? `不吃：${snapshot.avoid.join("、")}` : "未排除";
+            const preferences = snapshot.preferences.length ? `偏好：${snapshot.preferences.join("、")}` : "未選偏好";
+            return `${snapshot.radiusKm} 公里內 / ${snapshot.transport} / ${snapshot.minimumRating} 星以上 / ${avoid} / ${preferences}`;
+          }
+
+          function choosePlace(snapshot) {
+            const candidates = demoPlaces.filter((place) => {
+              const passesRating = place.rating >= snapshot.minimumRating;
+              const avoidsBlocked = !snapshot.avoid.some((avoid) => place.tags.includes(avoid));
+              const matchesPreference = !snapshot.preferences.length || snapshot.preferences.some((pref) => place.tags.includes(pref));
+              return passesRating && avoidsBlocked && matchesPreference;
+            });
+
+            const fallback = demoPlaces.filter((place) => place.rating >= snapshot.minimumRating);
+            const pool = candidates.length ? candidates : fallback.length ? fallback : demoPlaces;
+            return pool[Math.floor(Math.random() * pool.length)];
+          }
+
+          function snapshotFilters() {
+            return {
+              radiusKm: filters.radiusKm,
+              transport: filters.transport,
+              minimumRating: filters.minimumRating,
+              avoid: [...filters.avoid],
+              preferences: [...filters.preferences]
+            };
+          }
+
+          function startDraw() {
+            if (remainingCredits.value === 0) {
+              revealText.value = "今日 3 次已用完";
+              return;
+            }
+
+            const filterSnapshot = snapshotFilters();
+            pendingEntry.value = {
+              place: choosePlace(filterSnapshot),
+              filters: filterSnapshot,
+              filterSummary: buildSummary(filterSnapshot),
+              createdAt: new Date().toISOString()
+            };
+
+            isDrawing.value = true;
+            isPulling.value = true;
+            isDoorOpen.value = true;
+            showCapsule.value = false;
+            capsuleOpened.value = false;
+            revealText.value = "";
+
+            window.setTimeout(() => {
+              isPulling.value = false;
+              showCapsule.value = true;
+            }, 740);
+          }
+
+          function openCapsule() {
+            if (!pendingEntry.value) return;
+
+            capsuleOpened.value = true;
+            revealText.value = `今天吃：${pendingEntry.value.place.name}`;
+
+            window.setTimeout(() => {
+              showCapsule.value = false;
+              isDoorOpen.value = false;
+              state.usedCreditsToday += 1;
+              state.drawHistoryToday = [...state.drawHistoryToday, pendingEntry.value].slice(0, 3);
+              selectedEntry.value = pendingEntry.value;
+              pendingEntry.value = null;
+              isDrawing.value = false;
+              saveState();
+            }, 420);
+          }
+
+          watch(
+            () => state.drawHistoryToday,
+            () => nextTick(saveState),
+            { deep: true }
+          );
+
+          return {
+            transportOptions,
+            avoidOptions,
+            preferenceOptions,
+            state,
+            filters,
+            theme,
+            isDrawing,
+            isPulling,
+            isDoorOpen,
+            showCapsule,
+            capsuleOpened,
+            revealText,
+            selectedEntry,
+            remainingCredits,
+            startDraw,
+            openCapsule
+          };
+        }
+      }).mount("#app");
+    </script>
+  </body>
+</html>
