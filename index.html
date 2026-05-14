@@ -1198,7 +1198,7 @@
               distance,
               distanceText: formatDistance(distance),
               tags: tagsForFiltering(tags),
-              mapUrl: `https://maps.apple.com/?ll=${latitude},${longitude}&q=${encodeURIComponent(tags.name)}`
+              mapUrl: `https://maps.apple.com/search?query=${encodeURIComponent(tags.name)}&ll=${latitude},${longitude}`
             };
           }
 
@@ -1317,8 +1317,10 @@
 
           function buildApplePlaceUrl(entry) {
             const destination = `${entry.place.latitude},${entry.place.longitude}`;
-            const name = encodeURIComponent(entry.place.name);
-            return `https://maps.apple.com/?ll=${destination}&q=${name}`;
+            const queryText = entry.place.address
+              ? `${entry.place.name} ${entry.place.address}`
+              : entry.place.name;
+            return `https://maps.apple.com/search?query=${encodeURIComponent(queryText)}&ll=${destination}`;
           }
 
           function buildAppleDirectionsUrl(entry) {
