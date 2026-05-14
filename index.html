@@ -258,31 +258,32 @@
         content: "";
         position: absolute;
         left: 50%;
-        bottom: 12px;
-        width: 30px;
-        height: 30px;
+        top: 74px;
+        width: 42px;
+        height: 42px;
         border: 4px solid var(--cat-line);
         border-radius: 50%;
-        background: var(--cat-accent);
+        background: rgba(255, 247, 232, 0.72);
         transform: translateX(-50%);
       }
 
       .arm-label {
         position: absolute;
         left: 50%;
-        top: 8px;
+        top: 78px;
         display: grid;
-        width: 42px;
-        height: 42px;
+        width: 34px;
+        height: 34px;
         place-items: center;
-        border: 3px solid var(--cat-line);
+        border: 0;
         border-radius: 50%;
         color: #fffaf1;
         background: var(--cat-accent);
         transform: translateX(-50%);
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 900;
         pointer-events: none;
+        z-index: 1;
       }
 
       .arm:disabled {
@@ -297,15 +298,17 @@
       .coin-door {
         position: absolute;
         left: 50%;
-        top: 78px;
+        top: 96px;
         display: grid;
-        width: 118px;
-        height: 118px;
+        width: 138px;
+        height: 102px;
         place-items: center;
         border: 5px solid var(--cat-line);
-        border-radius: 50%;
+        border-radius: 52% / 64%;
         color: #7a461f;
-        background: var(--gold);
+        background:
+          radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.2), transparent 24%),
+          var(--gold);
         transform: translateX(-50%);
         transition: transform 0.36s ease, opacity 0.36s ease;
         transform-origin: top center;
