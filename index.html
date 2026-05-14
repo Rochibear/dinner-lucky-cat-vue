@@ -859,7 +859,8 @@
           </dl>
           <div class="actions">
             <a class="action-button" :class="{ disabled: !selectedEntry?.place.phone }" :href="selectedEntry?.place.phone ? `tel:${selectedEntry.place.phone.replaceAll('-', '')}` : '#'">撥打電話</a>
-            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildMapUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">地圖導航</a>
+            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildAppleMapUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">Apple Map</a>
+            <a class="action-button secondary" :class="{ disabled: !selectedEntry }" :href="selectedEntry ? buildGoogleMapUrl(selectedEntry) : '#'" target="_blank" rel="noreferrer">Google Map</a>
           </div>
         </section>
 
@@ -1214,13 +1215,21 @@
             return "driving";
           }
 
-          function buildMapUrl(entry) {
+          function buildAppleMapUrl(entry) {
             const destination = `${entry.place.latitude},${entry.place.longitude}`;
             const name = encodeURIComponent(entry.place.name);
             if (!currentLocation.value) return entry.place.mapUrl;
             const origin = `${currentLocation.value.latitude},${currentLocation.value.longitude}`;
             const transportMode = entry.filters.transport === "步行" ? "w" : "d";
             return `https://maps.apple.com/?saddr=${origin}&daddr=${destination}&q=${name}&dirflg=${transportMode}`;
+          }
+
+          function buildGoogleMapUrl(entry) {
+            const destination = `${entry.place.latitude},${entry.place.longitude}`;
+            if (!currentLocation.value) return `https://www.google.com/maps/search/?api=1&query=${destination}`;
+            const origin = `${currentLocation.value.latitude},${currentLocation.value.longitude}`;
+            const mode = travelModeForMaps(entry.filters.transport);
+            return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${mode}`;
           }
 
           function scrollToResult() {
@@ -1325,7 +1334,8 @@
             selectedEntry,
             remainingCredits,
             requestLocation,
-            buildMapUrl,
+            buildAppleMapUrl,
+            buildGoogleMapUrl,
             selectEntry,
             scrollToTop,
             startDraw,
